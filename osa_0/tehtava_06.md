@@ -8,14 +8,20 @@ sequenceDiagram
 
     %% Käyttäjä syöttää tekstin ja painaa "Tallenna"-painiketta
     Käyttäjä ->> Selain: Syöttää muistiinpanon ja painaa "Tallenna"
-    Selain ->> Selain: Lisää uusi muistiinpano muistiinpanojen listaan (ilman sivun uudelleenlatausta)
-    Selain ->> Palvelin: HTTP POST /exampleapp/new_note_spa
-    note right of Selain: Lähettää muistiinpanon datan palvelimelle (JSON-muodossa)
+
+    %% lisää muistiinpanon ilman sivun uudelleenlatausta
+    Selain ->> Selain: Lisää uusi muistiinpano muistiinpanojen listaan
+
+    %% POST -pyyntö, sisältää JSON muodossa muistiinpanon (content ja date)
+    %% content-type application/json; charset=utf-8
+    Selain ->> Palvelin: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    
+    note right of Selain: Content kertoo että data on JSON-muodossa
+
+    %% ilman headeria palvelin ei osaa käsitellä pyynnön mukana olevaa dataa
     Palvelin -->> Selain: 201 Created (Muistiinpano tallennettu)
 
-    %% Selain ei lataa koko sivua uudelleen, mutta voi hakea päivitetyn datan
-    Selain ->> Palvelin: HTTP GET /data.json
-    Palvelin -->> Selain: 200 OK (Päivitetty JSON-data)
+    %% Muita pyyntöljä ei toteuteta, selain pysyy samallla sivulla.
 
     %% Selain päivittää näkymän käyttäjälle
     Selain ->> Käyttäjä: Näyttää päivitetyn muistiinpanolistan
