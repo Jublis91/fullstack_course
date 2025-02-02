@@ -1,75 +1,76 @@
 import { useState } from 'react'
 
-const Button = ({ onClick, text }) => (
-  <button onClick={onClick}>
-    {text}
-  </button>
+const Button = ({ handleClick, text }) => (
+  <button onClick={handleClick}>{text}</button>
 )
 
-const Statistics = ({ good, neutral, bad, all }) => {
+const StatisticLine = ({ text, value }) => (
+  <tr>
+    <td>{text}</td>
+    <td>{value}</td>
+  </tr>
+)
+
+const Statistics = ({ good, neutral, bad }) => {
+  console.log("Current state - good:", good, "neutral:", neutral, "bad:", bad);
+  
   const total = good + neutral + bad
-  const avarage = (good - bad) / total
-  const positive = (good / total) * 100
+  console.log("Total feedbacks:", total);
+  
+  const average = total ? (good - bad) / total : 0
+  console.log("Average score:", average);
+  
+  const positive = total ? (good / total) * 100 : 0
+  console.log("Positive feedback percentage:", positive);
 
   if (total === 0) {
-    return (
-      <div>
-        <p>No feedback given</p>
-      </div>
-    )
+    return <p>No feedback given</p>
   }
 
-              //Tällä hetkellä menossa 1.10: unicafe step5
-
   return (
-    <div>
-      <p>Good: {good}</p>
-      <p>Neutral: {neutral}</p>
-      <p>Bad: {bad}</p>
-      <p>All: {all}</p>
-      <p>Avarage: {avarage}</p>
-      <p>Positive: {positive} %</p>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Statistic</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <StatisticLine text="Good" value={good} />
+        <StatisticLine text="Neutral" value={neutral} />
+        <StatisticLine text="Bad" value={bad} />
+        <StatisticLine text="All" value={total} />
+        <StatisticLine text="Average" value={average.toFixed(1)} />
+        <StatisticLine text="Positive" value={positive.toFixed(1) + ' %'} />
+      </tbody>
+    </table>
   )
-
 }
 
 const App = () => {
-  // tallenna napit omaan tilaansa
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
-  const [all, setAll] = useState(0)
-  
-  const handleGoodClick = () => {
-    setGood(good + 1)
-    setAll(all + 1)
-    console.log('good: ', good)
-    console.log('all: ', all)
-  }
 
-  const handleNeutralClick = () => {
-    setNeutral(neutral + 1)
-    setAll(all + 1)
-    console.log('neutral: ', neutral)
-    console.log('all: ', all)
-  }
-
-  const handleBadClick = () => {
-    setBad(bad + 1)
-    setAll(all + 1)
-    console.log('bad: ', bad)
-    console.log('all: ', all)
-  }
+  console.log("State - good:", good, "neutral:", neutral, "bad:", bad);
 
   return (
     <div>
       <h1>Give feedback</h1>
-      <Button onClick={handleGoodClick} text='Good' />
-      <Button onClick={handleNeutralClick} text='Neutral' />
-      <Button onClick={handleBadClick} text='Bad' />
-      <h2>Statistics</h2>
-      <Statistics good={good} neutral={neutral} bad={bad} all={all} />
+      <Button handleClick={() => {
+        console.log("Good button clicked");
+        setGood(good + 1);
+      }} text="Good" />
+      <Button handleClick={() => {
+        console.log("Neutral button clicked");
+        setNeutral(neutral + 1);
+      }} text="Neutral" />
+      <Button handleClick={() => {
+        console.log("Bad button clicked");
+        setBad(bad + 1);
+      }} text="Bad" />
+      <h1>Statistics</h1>
+      <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
   )
 }
