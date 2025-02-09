@@ -1,11 +1,16 @@
 const Names = ({ persons }) => {
     return (
-        <ul>
-            {persons.map((person, index) =>(
-                <li key={index}>{person.name}</li>
-            ))}
-        </ul>
+      <ul>
+        {persons.map((person, index) => (
+          <Person key={index} person={person} />
+        ))}
+      </ul>
     )
-}
-
-export default Names
+  }
+  
+  const Person = ({ person }) => {
+    return <li>{person.name}: {person.number}</li>
+  }
+  
+  export default Names
+  
