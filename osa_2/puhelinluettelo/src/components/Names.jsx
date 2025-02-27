@@ -1,16 +1,20 @@
-const Names = ({ persons }) => {
-    return (
-      <ul>
-        {persons.map((person, index) => (
-          <Person key={index} person={person} />
-        ))}
-      </ul>
-    )
-  }
-  
-  const Person = ({ person }) => {
-    return <li>{person.name}: {person.number}</li>
-  }
-  
-  export default Names
-  
+const Names = ({ persons, onDelete }) => {
+  return (
+    <ul>
+      {persons.map(person => (
+        <Person key={person.id} person={person} onDelete={onDelete} />
+      ))}
+    </ul>
+  )
+}
+
+const Person = ({ person, onDelete }) => {
+  return (
+    <li>
+      {person.name}: {person.number} 
+      <button onClick={() => onDelete(person.id)}> Poista </button>
+    </li>
+  )
+}
+
+export default Names

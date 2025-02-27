@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
+
+import personService from './services/persons'
 
 import Names from './components/Names'
 import PersonForm from './components/PersonForm'
@@ -12,52 +13,68 @@ const App = () => {
   const [filter , setFilter] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
+    personService
+      .getAll()
+      .then(initialPersons => setPersons(initialPersons))
+      .catch(error => console.log('Tietojen haku epäonnistui', error))
   }, [])
+
   console.log('render', persons.length, 'persons')
 
   const AddPerson = (event) => {
-    console.log("Nimen syöttökenttä:", event.target.value)
     setNewName(event.target.value)
   }
 
   const AddNumber = (event) => {
-    console.log("Numeron syöttökenttä:", event.target.value)
     setNewNumber(event.target.value)
   }
 
   const AddFilter = (event) => {
-    console.log("Hakukenttä:", event.target.value)
     setFilter(event.target.value)
   }
 
   const Submit = (event) => {
     event.preventDefault()
     console.log("Lähetettiin lomake")
-    console.log("Lisättävä nimi:", newName)
-    console.log("Lisättävä numero:", newNumber)
 
     const newPerson = { name: newName, number: newNumber }
 
-    if (persons.some(person => person.name === newName)) {
-      console.log(`Virhe: ${newName} on jo lisätty`)
-      alert(`${newName} is already added to phonebook`)
+    const existingPerson = persons.find(person => person.name === newName)
+
+    if (existingPerson) {
+      if (window.confirm(`${newName} on jo luettelossa, päivitetäänkö numero?`)) {
+        personService.update(existingPerson.id, { ...existingPerson, number: newNumber })
+          .then(updatedPerson => {
+            setPersons(persons.map(person => 
+              person.id !== existingPerson.id ? person : updatedPerson
+            ))
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch(error => console.log('Päivitys epäonnistui', error))
+      }
       return
     }
 
-    setPersons([...persons, newPerson])
-    console.log("Henkilölista päivitetty:", [...persons, newPerson])
-
-    setNewName('')
-    setNewNumber('')
+    personService.create(newPerson)
+      .then(addedPerson => {
+        setPersons([...persons, addedPerson])
+        setNewName('')
+        setNewNumber('')
+      })
+      .catch(error => console.log('Lisäys epäonnistui', error))
   }
 
+  const deletePerson = (id) => {
+    const person = persons.find(p => p.id === id)
+    if (!persons) return;
+
+    if (window.confirm(`Poistetaanko ${person.name}?`)) {
+      personService.remove(id)
+        .then(() => setPersons(persons.filter(person => person.id !== id)))
+        .catch(error => console.log('Poisto epäonnistui', error))
+    }
+  }
   const filteredPerson = persons.filter(person =>
     filter ? person.name.toLowerCase().includes(filter.toLowerCase()) : true
   )
@@ -79,7 +96,7 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <Names persons={filteredPerson} />
+      <Names persons={filteredPerson} onDelete={deletePerson} />
     </div>
   )
 }
